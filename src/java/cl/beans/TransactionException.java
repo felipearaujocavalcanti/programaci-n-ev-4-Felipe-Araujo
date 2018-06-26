@@ -9,7 +9,7 @@ import javax.ejb.ApplicationException;
 
 /**
  *
- * @author 19858049-K
+ * @author 25597723-7
  */
 @ApplicationException(rollback =true)
 public class TransactionException extends Exception{

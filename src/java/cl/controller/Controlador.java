@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author clrubilarc
+ * @author 25597723-7
  */
 @WebServlet(name = "Controlador", urlPatterns = {"/control.do"})
 public class Controlador extends HttpServlet {

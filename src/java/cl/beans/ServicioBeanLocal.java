@@ -6,16 +6,18 @@
 package cl.beans;
 
 import cl.entities.Categoria;
+import cl.entities.DetalleVenta;
 import cl.entities.Perfil;
 import cl.entities.Producto;
 import cl.entities.Usuario;
+import cl.entities.Venta;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Local;
 
 /**
  *
- * @author clrubilarc
+ * @author 25597723-7
  */
 @Local
 public interface ServicioBeanLocal {
@@ -33,10 +35,12 @@ public interface ServicioBeanLocal {
     List<Producto> getProductos();
     List<Usuario> getUsuarios();
     List<Perfil> getPerfiles();
-    List<Perfil> getVentas();
+    List<Venta> getVentas();
+    List<DetalleVenta> getDetalleVentas();
     
    void compra(String rut, ArrayList<String> lista) throws TransactionException;
-    public void insertar(Categoria newcat);
+    
+   public void insertar(Categoria newcat);
 
     
 }

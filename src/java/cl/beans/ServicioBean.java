@@ -6,11 +6,14 @@
 package cl.beans;
 
 import cl.entities.Categoria;
+import cl.entities.DetalleVenta;
 import cl.entities.Perfil;
 import cl.entities.Producto;
-
+import cl.entities.DetalleVenta;
 import cl.entities.Usuario;
+import cl.entities.Venta;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Singleton;
 import javax.persistence.EntityManager;
@@ -18,7 +21,7 @@ import javax.persistence.PersistenceContext;
 
 /**
  *
- * @author clrubilarc
+ * @author 25597723-7
  */
 @Singleton
 public class ServicioBean implements ServicioBeanLocal {
@@ -98,14 +101,67 @@ public class ServicioBean implements ServicioBeanLocal {
 
     @Override
     public void compra(String rut, ArrayList<String> lista) throws TransactionException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         ArrayList<DetalleVenta> detallelist = new ArrayList<>();    
+        
+    Usuario user = buscarUsuario(rut);  
+    
+    Venta newventa = new Venta();
+    newventa.setUsuario(user);
+    newventa.setFechaVenta(new Date());
+
+//    idDetalleVenta producto venta precio
+
+    
+    int codigo;
+    int unidad;
+    int suma=0;
+        for (String s : lista) {
+            String []x =s.split(",");
+        codigo = Integer.parseInt(x[0]);
+        unidad = Integer.parseInt(x[1]);
+        
+        Producto p = buscarProducto(codigo);
+        
+            if (p.getUnidadesProducto()< unidad) {
+             throw new TransactionException();   
+              //si se intenta comprar más que la cantidad disponible se lanza una
+              //exception y se cancela la transacción
+            }
+            p.setUnidadesProducto(p.getUnidadesProducto()-unidad);
+            em.merge(p);
+        
+            
+            DetalleVenta newdetalle = new DetalleVenta();
+            newdetalle.setProducto(p);
+            newdetalle.setVenta(newventa);
+            newdetalle.setPrecio(p.getPrecioProducto());
+            
+            detallelist.add(newdetalle);
+            
+            suma += p.getPrecioProducto()*unidad;
+            
+        }
+        newventa.setTotalVenta(suma);
+        
+        em.persist(newventa);
+        //asocial la venta con cada detalle
+        newventa.setDetalleVentaList(detallelist);
+        em.merge(newventa);
+        //asociar el usuario con la venta
+        user.getVentaList().add(newventa);
+        em.merge(user);
+        //sincronización
+        em.flush();
     }
 
     @Override
-    public List<Perfil> getVentas() {
-        return em.createNamedQuery("Perfil.findAll").getResultList();
+    public List<Venta> getVentas() {
+        return em.createNamedQuery("Venta.findAll").getResultList();
     }
 
-    
+    @Override
+    public List<DetalleVenta> getDetalleVentas() {
+        return em.createNamedQuery("DetalleVenta.findAll").getResultList();
+    }
   
 }

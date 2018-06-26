@@ -1,6 +1,11 @@
 <%@include file="plantilla/header.jsp" %>
 <%@include file="plantilla/menu.jsp" %>
 
+
+<c:set var="detalleventa" scope="page" value="<%= servicio.getDetalleVentas() %>"/>
+<c:set var="detalleventa" scope="page" value="<%= servicio.getVentas() %>"/>
+
+
 <center><h1>Medicina Veterinaria General</h1></center>
 
 <div class="container">
@@ -12,6 +17,41 @@
 				
 			</div>		
 			
+                      <table class="bordered">
+                 <thead>
+                     <tr><th>Código Compra</th>
+                         <th>Rut</th>
+                         <th>Fecha de la Compra</th>
+                         <th>Total</th>
+                        
+                         
+                     
+                     </tr>
+                     
+                 </thead>
+                 <tbody>
+                     
+                     <c:forEach items="${pageScope.detalleventa}" var="d">
+                         <tr>
+                             <td>${d.idVenta}</td> 
+                             <td>${sessionScope.person.rutUser}</td>
+                             <td>${d.fechaVenta}</td>
+                             <td>${d.totalVenta}</td>
+                             
+                             
+                         </tr>
+                     </c:forEach>
+                      
+                 </tbody>
+                 
+             </table>  	
+                        
+                        
+                        
+                        
+                        
+                        
+                        
 	<div class="row ">
     <div class="col s4 hoverable ">
       <div class="card">

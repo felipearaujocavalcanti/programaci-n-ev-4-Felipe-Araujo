@@ -6,10 +6,14 @@
 package cl.controller;
 
 import cl.beans.ServicioBeanLocal;
+import cl.beans.TransactionException;
 import cl.entities.Producto;
+import cl.entities.Usuario;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,7 +32,7 @@ public class ControladorCarro extends HttpServlet {
     private ServicioBeanLocal servicio;
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, TransactionException {
             String boton2 = request.getParameter("boton2");
         switch (boton2) {
             case "addcar":
@@ -44,11 +48,32 @@ public class ControladorCarro extends HttpServlet {
     }
     
     private void compra(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, TransactionException {
            
-        request.setAttribute("msg", "Compra Efectuada");
-           response.sendRedirect("compraefectuada.jsp");
+         String rut = request.getParameter("rut");
+        Usuario user = servicio.buscarUsuario(rut);
+        
+            ArrayList<Producto> carro = (ArrayList) request.getSession().getAttribute("carro");
+            ArrayList<String> data = new ArrayList<>();
+            for (Producto p : carro) {
+                String unidad = request.getParameter("unidades" + p.getIdProducto());
+                data.add(p.getIdProducto() + "," + unidad);
+            }
+            try {
+                servicio.compra(rut, data);
+                request.setAttribute("msg", "Compra realizada exitosamente");
+                request.getRequestDispatcher("compraefectuada.jsp").forward(request, response);
+
+            } catch (TransactionException ex) {
+                request.setAttribute("msg", "Hubo un error de stock al intentar su compra revise su carro de compra");
+                request.getRequestDispatcher("carrito.jsp").forward(request, response);
+                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            request.setAttribute("msg", "usuario no encontrado");
+            request.getRequestDispatcher("carrito.jsp").forward(request, response);
        }
+    
+    
     
     private void deletecar(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -92,7 +117,11 @@ public class ControladorCarro extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (TransactionException ex) {
+            Logger.getLogger(ControladorCarro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -106,7 +135,11 @@ public class ControladorCarro extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (TransactionException ex) {
+            Logger.getLogger(ControladorCarro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
